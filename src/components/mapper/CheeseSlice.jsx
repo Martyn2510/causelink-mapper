@@ -4,11 +4,11 @@ import HoleCard from "./HoleCard";
 export default function CheeseSlice({ layer, holes, onAdd, onDelete }) {
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      <div className="text-center mb-3 flex flex-col">
-        <h3 className="font-heading text-[15.5px] text-[#0E2F33] min-h-[38px] flex items-end justify-center font-semibold">
+      <div className="text-center mb-3 flex flex-col h-[110px]">
+        <h3 className="font-heading text-[15.5px] text-[#0E2F33] flex-none flex items-end justify-center font-semibold leading-snug" style={{minHeight: '2.5em'}}>
           {layer.name}
         </h3>
-        <div className="text-[11.5px] text-[#1C4448] mt-1.5 min-h-[66px]">
+        <div className="text-[11.5px] text-[#1C4448] mt-1.5 flex-1 overflow-hidden">
           {layer.desc}
         </div>
       </div>
