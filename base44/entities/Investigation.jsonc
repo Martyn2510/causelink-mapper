@@ -1,0 +1,72 @@
+{
+  "name": "Investigation",
+  "type": "object",
+  "properties": {
+    "ref": {
+      "type": "string",
+      "description": "Investigation/Event reference"
+    },
+    "title": {
+      "type": "string",
+      "description": "Event title"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of event"
+    },
+    "investigator": {
+      "type": "string",
+      "description": "Lead investigator name"
+    },
+    "outcome": {
+      "type": "string",
+      "description": "The outcome/loss event description"
+    },
+    "timeline": {
+      "type": "array",
+      "description": "Sequence of events with why analysis",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "whys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "holes": {
+      "type": "object",
+      "description": "Barrier breaches by layer",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "ctrl": {
+              "type": "string"
+            },
+            "ev": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
