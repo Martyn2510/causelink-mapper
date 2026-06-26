@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Printer, Loader2, AlertTriangle, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { X, Printer, Loader2, AlertTriangle, FileText, Mail, Check } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { generateReportPdf } from "@/lib/reportPdf";
 
 function Section({ number, title, children }) {
   return (
@@ -36,10 +39,37 @@ function ActionCategory({ label, items, color }) {
   );
 }
 
-export default function ReportModal({ open, loading, report, error, onClose }) {
+export default function ReportModal({ open, loading, report, error, onClose, title }) {
+  const [emailMode, setEmailMode] = useState(false);
+  const [emailAddress, setEmailAddress] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState(null);
+
   if (!open) return null;
 
   const handlePrint = () => window.print();
+
+  const handleEmailReport = async () => {
+    setEmailSending(true);
+    setEmailError(null);
+    try {
+      const doc = generateReportPdf(report, title);
+      const pdfBlob = doc.output("blob");
+      const pdfFile = new File([pdfBlob], `investigation-report-${Date.now()}.pdf`, { type: "application/pdf" });
+      const uploadResult = await base44.integrations.Core.UploadFile({ file: pdfFile });
+      await base44.functions.invoke("emailReport", {
+        email: emailAddress,
+        fileUrl: uploadResult.file_url,
+        title: title || "Untitled",
+      });
+      setEmailSent(true);
+    } catch (err) {
+      setEmailError(err.message || "Failed to send email.");
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   return (
     <div
@@ -60,15 +90,26 @@ export default function ReportModal({ open, loading, report, error, onClose }) {
           </div>
           <div className="flex items-center gap-2">
             {!loading && !error && (
-              <Button
-                onClick={handlePrint}
-                variant="outline"
-                size="sm"
-                className="text-white border-white/30 hover:bg-white/10 hover:text-white print:hidden"
-              >
-                <Printer className="w-3.5 h-3.5 mr-1" />
-                Print
-              </Button>
+              <>
+                <Button
+                  onClick={handlePrint}
+                  variant="outline"
+                  size="sm"
+                  className="text-white border-white/30 hover:bg-white/10 hover:text-white print:hidden"
+                >
+                  <Printer className="w-3.5 h-3.5 mr-1" />
+                  Print
+                </Button>
+                <Button
+                  onClick={() => { setEmailMode(!emailMode); setEmailSent(false); setEmailError(null); }}
+                  variant="outline"
+                  size="sm"
+                  className="text-white border-white/30 hover:bg-white/10 hover:text-white print:hidden"
+                >
+                  <Mail className="w-3.5 h-3.5 mr-1" />
+                  Email
+                </Button>
+              </>
             )}
             <button
               onClick={onClose}
@@ -81,6 +122,43 @@ export default function ReportModal({ open, loading, report, error, onClose }) {
 
         {/* Body */}
         <div className="p-6">
+          {!loading && !error && report && emailMode && !emailSent && (
+            <div className="mb-5 bg-[#F1F5F4] border border-[#D5E0DE] rounded-[10px] p-4 print:hidden">
+              <label className="text-[12.5px] font-semibold text-[#0E2F33] mb-1.5 block">
+                Email PDF to:
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={emailAddress}
+                  onChange={(e) => setEmailAddress(e.target.value)}
+                  placeholder="recipient@example.com"
+                  className="flex-1 h-9 text-[13px]"
+                  disabled={emailSending}
+                />
+                <Button
+                  onClick={handleEmailReport}
+                  disabled={emailSending || !emailAddress}
+                  className="bg-[#0F766E] text-white hover:bg-[#0F766E]/90"
+                  size="sm"
+                >
+                  {emailSending ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Mail className="w-3.5 h-3.5 mr-1" />}
+                  Send
+                </Button>
+              </div>
+              {emailError && (
+                <p className="text-[12px] text-[#C5563D] mt-2">{emailError}</p>
+              )}
+            </div>
+          )}
+          {!loading && !error && report && emailSent && (
+            <div className="mb-5 bg-[#F1F5F4] border border-[#7FA88B] rounded-[10px] p-4 flex items-center gap-2 print:hidden">
+              <Check className="w-5 h-5 text-[#0F766E] flex-shrink-0" />
+              <p className="text-[13px] text-[#1C4448]">
+                Report PDF sent to <span className="font-semibold">{emailAddress}</span>
+              </p>
+            </div>
+          )}
           {loading && (
             <div className="flex flex-col items-center justify-center py-16">
               <Loader2 className="w-8 h-8 text-[#0F766E] animate-spin mb-3" />

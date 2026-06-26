@@ -342,6 +342,7 @@ export default function CausationMapper() {
         report={reportData}
         error={reportError}
         onClose={() => setReportOpen(false)}
+        title={meta?.title}
       />
     </div>
   );
