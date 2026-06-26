@@ -7,11 +7,14 @@ import CheeseBoard from "@/components/mapper/CheeseBoard";
 import BreachModal from "@/components/mapper/BreachModal";
 import EvidenceLibrary from "@/components/mapper/EvidenceLibrary";
 import EvidenceLinker from "@/components/mapper/EvidenceLinker";
+import ReportModal from "@/components/mapper/ReportModal";
+import { base44 } from "@/api/base44Client";
 import SummaryPanel from "@/components/mapper/SummaryPanel";
 import SectionIntro from "@/components/mapper/SectionIntro";
 import Caveat from "@/components/mapper/Caveat";
 import Footer from "@/components/mapper/Footer";
 import { LAYERS, DEMO_DATA, DEMO_PEEPO, DEMO_EVIDENCE, getInitialHoles } from "@/lib/layers";
+import { FileText } from "lucide-react";
 
 function normalizePeepo(arr) {
   if (!Array.isArray(arr)) return [];
@@ -32,6 +35,10 @@ export default function CausationMapper() {
   const [modalLayerId, setModalLayerId] = useState(null);
   const [linkerOpen, setLinkerOpen] = useState(false);
   const [linkerTarget, setLinkerTarget] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportData, setReportData] = useState(null);
+  const [reportError, setReportError] = useState(null);
+  const [reportOpen, setReportOpen] = useState(false);
 
   // Timeline handlers
   const addStep = useCallback(() => {
@@ -158,6 +165,23 @@ export default function CausationMapper() {
     [linkerTarget]
   );
 
+  const handleGenerateReport = useCallback(async () => {
+    setReportLoading(true);
+    setReportError(null);
+    setReportData(null);
+    setReportOpen(true);
+    try {
+      const response = await base44.functions.invoke("generateReport", {
+        meta, timeline, holes, peepo, evidence,
+      });
+      setReportData(response.data);
+    } catch (err) {
+      setReportError(err.message || "Failed to generate report.");
+    } finally {
+      setReportLoading(false);
+    }
+  }, [meta, timeline, holes, peepo, evidence]);
+
   const linkerLinkedIds = linkerTarget
     ? linkerTarget.kind === "timeline"
       ? timeline[linkerTarget.index]?.evidence_ids || []
@@ -280,6 +304,17 @@ export default function CausationMapper() {
 
         <EvidenceLibrary evidence={evidence} onAdd={addEvidence} onDelete={deleteEvidence} />
 
+        <div className="flex justify-center mb-6 print:hidden">
+          <button
+            onClick={handleGenerateReport}
+            disabled={reportLoading}
+            className="bg-[#0F766E] text-white rounded-[10px] py-3 px-6 font-heading font-semibold text-[14px] hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer border-none flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            {reportLoading ? "Generating report…" : "Generate Investigation Report"}
+          </button>
+        </div>
+
         <Caveat />
       </div>
 
@@ -299,6 +334,14 @@ export default function CausationMapper() {
         linkedIds={linkerLinkedIds}
         onToggle={toggleEvidenceLink}
         onClose={() => setLinkerOpen(false)}
+      />
+
+      <ReportModal
+        open={reportOpen}
+        loading={reportLoading}
+        report={reportData}
+        error={reportError}
+        onClose={() => setReportOpen(false)}
       />
     </div>
   );
