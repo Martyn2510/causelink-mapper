@@ -55,12 +55,12 @@ export const DEMO_DATA = {
     outcome: 'Haul truck lost retardation on descent, ran through windrow into laydown area. No injury; significant property damage and high-potential near-miss for personnel below ramp.',
   },
   timeline: [
-    { text: 'Night-shift haul cycle commences on ramp 3; operator on 12th consecutive night.', whys: ['Roster pattern permitted 12 consecutive nights.', 'Fatigue management standard not enforced for relief crews.'] },
-    { text: 'Intermittent retarder fault present but not actioned from prior pre-start reports.', whys: ['Defect not escalated to remove unit from service.', 'No trigger linked retarder faults to a stop-work decision.'] },
-    { text: 'Truck begins loaded descent; operator selects a higher gear than procedure for the grade.', whys: [] },
-    { text: 'Retardation fades on descent; truck accelerates beyond control speed.', whys: [] },
-    { text: 'Service brake applied late; insufficient distance remaining to recover.', whys: [] },
-    { text: 'Truck runs through windrow into laydown area; high-potential near-miss.', whys: ['No runaway escape ramp provided on ramp 3.'] },
+    { text: 'Night-shift haul cycle commences on ramp 3; operator on 12th consecutive night.', whys: ['Roster pattern permitted 12 consecutive nights.', 'Fatigue management standard not enforced for relief crews.'], evidence_ids: ['ev5'] },
+    { text: 'Intermittent retarder fault present but not actioned from prior pre-start reports.', whys: ['Defect not escalated to remove unit from service.', 'No trigger linked retarder faults to a stop-work decision.'], evidence_ids: ['ev2'] },
+    { text: 'Truck begins loaded descent; operator selects a higher gear than procedure for the grade.', whys: [], evidence_ids: ['ev1'] },
+    { text: 'Retardation fades on descent; truck accelerates beyond control speed.', whys: [], evidence_ids: ['ev1'] },
+    { text: 'Service brake applied late; insufficient distance remaining to recover.', whys: [], evidence_ids: [] },
+    { text: 'Truck runs through windrow into laydown area; high-potential near-miss.', whys: ['No runaway escape ramp provided on ramp 3.'], evidence_ids: ['ev4'] },
   ],
   holes: {
     org: [
@@ -83,31 +83,39 @@ export const DEMO_DATA = {
   },
 };
 
+export const DEMO_EVIDENCE = [
+  { id: 'ev1', title: 'Vehicle telemetry — ramp 3 descent', type: 'telemetry', description: 'Speed, gear selection, and brake application data exported from fleet management system.' },
+  { id: 'ev2', title: 'Pre-start defect reports 15–18 May', type: 'document', description: 'Three consecutive shifts logged intermittent retarder fault; not escalated to remove unit from service.' },
+  { id: 'ev3', title: 'Operator interview — W2', type: 'interview', description: 'Statement from night-shift operator regarding gear selection and retardation fade.' },
+  { id: 'ev4', title: 'Site inspection — ramp 3', type: 'site_observation', description: 'Photographs of windrow damage and laydown area; no escape ramp present on descent.' },
+  { id: 'ev5', title: 'Roster records — May cycle', type: 'document', description: 'Confirms 12 consecutive night shifts; FRMS exemption logged but not reviewed.' },
+];
+
 export const DEMO_PEEPO = {
   people: [
-    'Operator on 12th consecutive night shift — fatigue.',
-    'Relief operator not available; roster gap.',
-    'Supervisor did not action prior retarder defect reports.',
+    { text: 'Operator on 12th consecutive night shift — fatigue.', evidence_ids: ['ev5'] },
+    { text: 'Relief operator not available; roster gap.', evidence_ids: [] },
+    { text: 'Supervisor did not action prior retarder defect reports.', evidence_ids: ['ev2'] },
   ],
   equipment: [
-    'Ageing haul truck retained beyond planned service life.',
-    'Intermittent retarder fault across three shifts.',
-    'No in-cab decision support for descent gear selection.',
+    { text: 'Ageing haul truck retained beyond planned service life.', evidence_ids: [] },
+    { text: 'Intermittent retarder fault across three shifts.', evidence_ids: ['ev2'] },
+    { text: 'No in-cab decision support for descent gear selection.', evidence_ids: ['ev1'] },
   ],
   environment: [
-    'Ramp 3 descent grade and load condition.',
-    'No runaway escape ramp provided.',
-    'Windrow was sole physical defence at base.',
+    { text: 'Ramp 3 descent grade and load condition.', evidence_ids: [] },
+    { text: 'No runaway escape ramp provided.', evidence_ids: ['ev4'] },
+    { text: 'Windrow was sole physical defence at base.', evidence_ids: ['ev4'] },
   ],
   procedures: [
-    'Gear-selection rule for grade not reinforced.',
-    'Defect escalation procedure not enforced by supervision.',
-    'No trigger linking retarder faults to stop-work decision.',
+    { text: 'Gear-selection rule for grade not reinforced.', evidence_ids: [] },
+    { text: 'Defect escalation procedure not enforced by supervision.', evidence_ids: ['ev2'] },
+    { text: 'No trigger linking retarder faults to stop-work decision.', evidence_ids: [] },
   ],
   organisation: [
-    'Fleet replacement deferred two budget cycles under production pressure.',
-    'No critical control management framework for "loss of control on grade".',
-    'Fatigue management standard not enforced for relief crews.',
+    { text: 'Fleet replacement deferred two budget cycles under production pressure.', evidence_ids: [] },
+    { text: 'No critical control management framework for "loss of control on grade".', evidence_ids: [] },
+    { text: 'Fatigue management standard not enforced for relief crews.', evidence_ids: ['ev5'] },
   ],
 };
 

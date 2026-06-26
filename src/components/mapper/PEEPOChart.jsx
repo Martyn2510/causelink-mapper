@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Paperclip } from "lucide-react";
 
 const COLUMNS = [
   { id: "people", label: "People", hint: "Fitness, fatigue, competency, behaviour, supervision.", color: "border-t-[#1C4448]" },
@@ -10,15 +10,15 @@ const COLUMNS = [
   { id: "organisation", label: "Organisation", hint: "Culture, resourcing, design, planning, management decisions.", color: "border-t-[#C5563D]" },
 ];
 
-export default function PEEPOChart({ peepo, onChange }) {
+export default function PEEPOChart({ peepo, onChange, onLinkEvidence }) {
   const addItem = (id) => {
     const list = peepo[id] || [];
-    onChange({ ...peepo, [id]: [...list, ""] });
+    onChange({ ...peepo, [id]: [...list, { text: "", evidence_ids: [] }] });
   };
 
   const updateItem = (id, idx, value) => {
     const list = [...(peepo[id] || [])];
-    list[idx] = value;
+    list[idx] = { ...list[idx], text: value };
     onChange({ ...peepo, [id]: list });
   };
 
@@ -43,23 +43,42 @@ export default function PEEPOChart({ peepo, onChange }) {
               </div>
 
               <div className="px-3 pb-3 flex-1 flex flex-col gap-2">
-                {(peepo[col.id] || []).map((item, idx) => (
-                  <div key={idx} className="relative">
-                    <textarea
-                      value={item}
-                      onChange={(e) => updateItem(col.id, idx, e.target.value)}
-                      placeholder="Enter a contributing factor…"
-                      rows={2}
-                      className="w-full text-[13px] text-[#0E2F33] bg-[#F1F5F4] border border-[#D5E0DE] rounded-lg p-2 pr-7 resize-none focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] placeholder:text-[#7FA88B]"
-                    />
-                    <button
-                      onClick={() => deleteItem(col.id, idx)}
-                      className="absolute top-1.5 right-1.5 w-[18px] h-[18px] rounded text-[13px] leading-[18px] text-center bg-[#0E2F33]/5 text-[#1C4448] hover:bg-[#C5563D] hover:text-white cursor-pointer border-none print:hidden flex items-center justify-center"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+                {(peepo[col.id] || []).map((item, idx) => {
+                  const evCount = (item.evidence_ids || []).length;
+                  return (
+                    <div key={idx} className="relative">
+                      <textarea
+                        value={item.text || ""}
+                        onChange={(e) => updateItem(col.id, idx, e.target.value)}
+                        placeholder="Enter a contributing factor…"
+                        rows={2}
+                        className={`w-full text-[13px] text-[#0E2F33] bg-[#F1F5F4] border rounded-lg p-2 pr-7 resize-none focus:outline-none focus:ring-1 ${
+                          evCount ? "border-[#0F766E]" : "border-[#D5E0DE] focus:border-[#0F766E]"
+                        }`}
+                      />
+                      <button
+                        onClick={() => deleteItem(col.id, idx)}
+                        className="absolute top-1.5 right-1.5 w-[18px] h-[18px] rounded flex items-center justify-center bg-[#0E2F33]/5 text-[#1C4448] hover:bg-[#C5563D] hover:text-white cursor-pointer border-none print:hidden"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          onLinkEvidence({
+                            kind: "peepo",
+                            colId: col.id,
+                            index: idx,
+                            label: `${col.label} — entry ${idx + 1}`,
+                          })
+                        }
+                        className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-[#0F766E] hover:underline print:hidden"
+                      >
+                        <Paperclip className="w-3 h-3" />
+                        {evCount > 0 ? `${evCount} evidence linked` : "Link evidence"}
+                      </button>
+                    </div>
+                  );
+                })}
 
                 <Button
                   onClick={() => addItem(col.id)}

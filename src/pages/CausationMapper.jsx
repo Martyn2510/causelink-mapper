@@ -5,23 +5,37 @@ import PEEPOChart from "@/components/mapper/PEEPOChart";
 import TimelineBoard from "@/components/mapper/TimelineBoard";
 import CheeseBoard from "@/components/mapper/CheeseBoard";
 import BreachModal from "@/components/mapper/BreachModal";
+import EvidenceLibrary from "@/components/mapper/EvidenceLibrary";
+import EvidenceLinker from "@/components/mapper/EvidenceLinker";
 import SummaryPanel from "@/components/mapper/SummaryPanel";
 import SectionIntro from "@/components/mapper/SectionIntro";
 import Caveat from "@/components/mapper/Caveat";
 import Footer from "@/components/mapper/Footer";
-import { LAYERS, DEMO_DATA, DEMO_PEEPO, getInitialHoles } from "@/lib/layers";
+import { LAYERS, DEMO_DATA, DEMO_PEEPO, DEMO_EVIDENCE, getInitialHoles } from "@/lib/layers";
+
+function normalizePeepo(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.map((item) =>
+    typeof item === "string"
+      ? { text: item, evidence_ids: [] }
+      : { text: item.text || "", evidence_ids: Array.isArray(item.evidence_ids) ? item.evidence_ids : [] }
+  );
+}
 
 export default function CausationMapper() {
   const [meta, setMeta] = useState({ ref: "", title: "", event_date: "", investigator: "", outcome: "" });
   const [timeline, setTimeline] = useState([]);
   const [holes, setHoles] = useState(getInitialHoles());
   const [peepo, setPeepo] = useState({ people: [], equipment: [], environment: [], procedures: [], organisation: [] });
+  const [evidence, setEvidence] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLayerId, setModalLayerId] = useState(null);
+  const [linkerOpen, setLinkerOpen] = useState(false);
+  const [linkerTarget, setLinkerTarget] = useState(null);
 
   // Timeline handlers
   const addStep = useCallback(() => {
-    setTimeline((prev) => [...prev, { text: "", whys: [] }]);
+    setTimeline((prev) => [...prev, { text: "", whys: [], evidence_ids: [] }]);
   }, []);
 
   const updateStep = useCallback((i, val) => {
@@ -79,15 +93,86 @@ export default function CausationMapper() {
     }));
   }, []);
 
+  // Evidence handlers
+  const addEvidence = useCallback((item) => {
+    setEvidence((prev) => [...prev, item]);
+  }, []);
+
+  const deleteEvidence = useCallback((id) => {
+    setEvidence((prev) => prev.filter((e) => e.id !== id));
+    setTimeline((prev) =>
+      prev.map((ev) => ({
+        ...ev,
+        evidence_ids: (ev.evidence_ids || []).filter((eid) => eid !== id),
+      }))
+    );
+    setPeepo((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((colId) => {
+        updated[colId] = (updated[colId] || []).map((item) => ({
+          ...item,
+          evidence_ids: (item.evidence_ids || []).filter((eid) => eid !== id),
+        }));
+      });
+      return updated;
+    });
+  }, []);
+
+  const openLinker = useCallback((target) => {
+    setLinkerTarget(target);
+    setLinkerOpen(true);
+  }, []);
+
+  const toggleEvidenceLink = useCallback(
+    (evidenceId) => {
+      if (!linkerTarget) return;
+      if (linkerTarget.kind === "timeline") {
+        setTimeline((prev) =>
+          prev.map((ev, idx) => {
+            if (idx !== linkerTarget.index) return ev;
+            const ids = ev.evidence_ids || [];
+            return {
+              ...ev,
+              evidence_ids: ids.includes(evidenceId)
+                ? ids.filter((id) => id !== evidenceId)
+                : [...ids, evidenceId],
+            };
+          })
+        );
+      } else {
+        setPeepo((prev) => {
+          const list = [...(prev[linkerTarget.colId] || [])];
+          const item = list[linkerTarget.index];
+          if (!item) return prev;
+          const ids = item.evidence_ids || [];
+          list[linkerTarget.index] = {
+            ...item,
+            evidence_ids: ids.includes(evidenceId)
+              ? ids.filter((id) => id !== evidenceId)
+              : [...ids, evidenceId],
+          };
+          return { ...prev, [linkerTarget.colId]: list };
+        });
+      }
+    },
+    [linkerTarget]
+  );
+
+  const linkerLinkedIds = linkerTarget
+    ? linkerTarget.kind === "timeline"
+      ? timeline[linkerTarget.index]?.evidence_ids || []
+      : peepo[linkerTarget.colId]?.[linkerTarget.index]?.evidence_ids || []
+    : [];
+
   // File operations
   const handleExport = useCallback(() => {
-    const data = { meta, timeline, holes, peepo, exported: new Date().toISOString() };
+    const data = { meta, timeline, holes, peepo, evidence, exported: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = (meta.ref || "swiss-cheese-map") + ".json";
     a.click();
-  }, [meta, timeline, holes]);
+  }, [meta, timeline, holes, peepo, evidence]);
 
   const handleImport = useCallback((data) => {
     if (data.meta) {
@@ -101,7 +186,15 @@ export default function CausationMapper() {
     }
     setTimeline(
       Array.isArray(data.timeline)
-        ? data.timeline.map((s) => (typeof s === "string" ? { text: s, whys: [] } : { text: s.text || "", whys: Array.isArray(s.whys) ? s.whys : [] }))
+        ? data.timeline.map((s) =>
+            typeof s === "string"
+              ? { text: s, whys: [], evidence_ids: [] }
+              : {
+                  text: s.text || "",
+                  whys: Array.isArray(s.whys) ? s.whys : [],
+                  evidence_ids: Array.isArray(s.evidence_ids) ? s.evidence_ids : [],
+                }
+          )
         : []
     );
     const newHoles = getInitialHoles();
@@ -110,12 +203,13 @@ export default function CausationMapper() {
     });
     setHoles(newHoles);
     setPeepo({
-      people: Array.isArray(data.peepo?.people) ? data.peepo.people : [],
-      equipment: Array.isArray(data.peepo?.equipment) ? data.peepo.equipment : [],
-      environment: Array.isArray(data.peepo?.environment) ? data.peepo.environment : [],
-      procedures: Array.isArray(data.peepo?.procedures) ? data.peepo.procedures : [],
-      organisation: Array.isArray(data.peepo?.organisation) ? data.peepo.organisation : [],
+      people: normalizePeepo(data.peepo?.people),
+      equipment: normalizePeepo(data.peepo?.equipment),
+      environment: normalizePeepo(data.peepo?.environment),
+      procedures: normalizePeepo(data.peepo?.procedures),
+      organisation: normalizePeepo(data.peepo?.organisation),
     });
+    setEvidence(Array.isArray(data.evidence) ? data.evidence : []);
   }, []);
 
   const handleLoadDemo = useCallback(() => {
@@ -123,6 +217,7 @@ export default function CausationMapper() {
     setTimeline(DEMO_DATA.timeline);
     setHoles(DEMO_DATA.holes);
     setPeepo(DEMO_PEEPO);
+    setEvidence(DEMO_EVIDENCE);
   }, []);
 
   const handleClear = useCallback(() => {
@@ -131,6 +226,7 @@ export default function CausationMapper() {
     setTimeline([]);
     setHoles(getInitialHoles());
     setPeepo({ people: [], equipment: [], environment: [], procedures: [], organisation: [] });
+    setEvidence([]);
   }, []);
 
   return (
@@ -149,7 +245,7 @@ export default function CausationMapper() {
           A structured way to ensure no factor domain is overlooked before building the event sequence — categorise factors across People, Equipment, Environment, Procedures and Organisation.
         </SectionIntro>
 
-        <PEEPOChart peepo={peepo} onChange={setPeepo} />
+        <PEEPOChart peepo={peepo} onChange={setPeepo} onLinkEvidence={openLinker} />
 
         <SectionIntro title="Sequence of events">
           The step-by-step lead-up to the incident. Add a box for each event in the chain, in the order it occurred, and describe what happened.
@@ -163,6 +259,7 @@ export default function CausationMapper() {
           onAddWhy={addWhy}
           onUpdateWhy={updateWhy}
           onDeleteWhy={deleteWhy}
+          onLinkEvidence={openLinker}
         />
 
         <SectionIntro title="Map the barrier breaches" legend>
@@ -177,6 +274,12 @@ export default function CausationMapper() {
 
         <SummaryPanel holes={holes} />
 
+        <SectionIntro title="Evidence Library">
+          Capture and manage all evidence items — interviews, photos, documents, telemetry — and link them to timeline events and PEEPO factors for a defensible audit trail.
+        </SectionIntro>
+
+        <EvidenceLibrary evidence={evidence} onAdd={addEvidence} onDelete={deleteEvidence} />
+
         <Caveat />
       </div>
 
@@ -187,6 +290,15 @@ export default function CausationMapper() {
         layerId={modalLayerId}
         onClose={() => setModalOpen(false)}
         onSave={saveBreach}
+      />
+
+      <EvidenceLinker
+        open={linkerOpen}
+        targetLabel={linkerTarget?.label || ""}
+        evidence={evidence}
+        linkedIds={linkerLinkedIds}
+        onToggle={toggleEvidenceLink}
+        onClose={() => setLinkerOpen(false)}
       />
     </div>
   );

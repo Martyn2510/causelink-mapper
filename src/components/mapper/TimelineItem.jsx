@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Plus } from "lucide-react";
+import { Paperclip } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 function ArrowSvg() {
@@ -12,8 +12,9 @@ function ArrowSvg() {
   );
 }
 
-export default function TimelineItem({ index, event, isLast, onUpdate, onDelete, onAddWhy, onUpdateWhy, onDeleteWhy }) {
+export default function TimelineItem({ index, event, isLast, onUpdate, onDelete, onAddWhy, onUpdateWhy, onDeleteWhy, onLinkEvidence }) {
   const atMax = (event.whys || []).length >= 10;
+  const evCount = (event.evidence_ids || []).length;
 
   return (
     <div className="flex items-start">
@@ -35,6 +36,13 @@ export default function TimelineItem({ index, event, isLast, onUpdate, onDelete,
             placeholder="Describe what happened…"
             className="flex-1 border-none resize-none text-[13px] text-[#0E2F33] bg-transparent leading-snug p-0 focus-visible:ring-0 shadow-none min-h-[60px]"
           />
+          <button
+            onClick={onLinkEvidence}
+            className="flex items-center gap-1 text-[10px] font-semibold text-[#0F766E] hover:underline mt-1 print:hidden"
+          >
+            <Paperclip className="w-3 h-3" />
+            {evCount > 0 ? `${evCount} evidence linked` : "Link evidence"}
+          </button>
         </div>
 
         {/* Why boxes */}
