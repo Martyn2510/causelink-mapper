@@ -335,7 +335,8 @@ export default function EvidenceLibrary({ evidence, onAdd, onDelete }) {
               accept="image/*"
               capture="environment"
               onChange={handleFileChange}
-              className="hidden"
+              className="sr-only"
+              style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
             />
           </div>
           <div className="flex gap-2 justify-end">
