@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 
 // Recursive node: { text, children: [node, ...] }
 
-export default function WhyNode({ node, depth, onUpdateText, onAddChild, onDeleteNode, onLinkEvidence, path, maxDepth = 6 }) {
+export default function WhyNode({ node, depth, onUpdateText, onAddChild, onDeleteNode, path, maxDepth = 6 }) {
   const [expanded, setExpanded] = React.useState(true);
   const isRoot = depth === 0;
   const indent = depth * 16;
@@ -27,7 +27,7 @@ export default function WhyNode({ node, depth, onUpdateText, onAddChild, onDelet
         }`}
       >
         <button
-          onClick={onDeleteNode}
+          onClick={() => onDeleteNode(path)}
           className="absolute top-1.5 right-1.5 w-[17px] h-[17px] rounded text-[12px] leading-[17px] text-center bg-white/15 text-white hover:bg-[#C5563D] cursor-pointer border-none print:hidden z-10"
         >
           ×
@@ -54,7 +54,7 @@ export default function WhyNode({ node, depth, onUpdateText, onAddChild, onDelet
 
         <Textarea
           value={node.text || ""}
-          onChange={(e) => onUpdateText(e.target.value)}
+          onChange={(e) => onUpdateText(path, e.target.value)}
           placeholder="Because…"
           className="flex-1 border-none resize-none text-[12.5px] text-white bg-transparent leading-snug p-0 focus-visible:ring-0 shadow-none placeholder:text-white/50 min-h-[24px]"
         />
@@ -62,18 +62,10 @@ export default function WhyNode({ node, depth, onUpdateText, onAddChild, onDelet
         <div className="flex gap-2 mt-1 print:hidden">
           {canAddChild && (
             <button
-              onClick={onAddChild}
+              onClick={() => onAddChild(path)}
               className="text-[10px] font-semibold text-[#9FBF3B] hover:underline cursor-pointer border-none bg-transparent p-0"
             >
               + Sub-cause
-            </button>
-          )}
-          {onLinkEvidence && (
-            <button
-              onClick={onLinkEvidence}
-              className="text-[10px] font-semibold text-white/60 hover:underline cursor-pointer border-none bg-transparent p-0"
-            >
-              Link evidence
             </button>
           )}
         </div>
@@ -88,9 +80,9 @@ export default function WhyNode({ node, depth, onUpdateText, onAddChild, onDelet
               node={child}
               depth={depth + 1}
               path={[...path, ci]}
-              onUpdateText={(val) => onUpdateText([...path, ci], val)}
-              onAddChild={() => onAddChild([...path, ci])}
-              onDeleteNode={() => onDeleteNode([...path, ci])}
+              onUpdateText={onUpdateText}
+              onAddChild={onAddChild}
+              onDeleteNode={onDeleteNode}
             />
           ))}
         </div>

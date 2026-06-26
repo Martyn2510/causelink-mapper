@@ -3,7 +3,7 @@ import { Paperclip } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Droppable } from "@hello-pangea/dnd";
 import WhyNode from "./WhyNode";
-import { whysToTree, updateNodeText, addChildAtPath, deleteNodeAtPath } from "./whyTreeUtils";
+import { whysToTree, treeToWhys, countTreeNodes, updateNodeText, addChildAtPath, deleteNodeAtPath } from "./whyTreeUtils";
 
 function ArrowSvg() {
   return (
@@ -17,6 +17,7 @@ function ArrowSvg() {
 
 export default function TimelineItem({ index, event, isLast, onUpdate, onDelete, onWhyTreeUpdate, onLinkEvidence }) {
   const tree = whysToTree(event.whys || []);
+  const nodeCount = countTreeNodes(tree);
 
   const handleUpdateText = (path, val) => {
     const newTree = updateNodeText(tree, path, val);
@@ -31,6 +32,16 @@ export default function TimelineItem({ index, event, isLast, onUpdate, onDelete,
   const handleDeleteNode = (path) => {
     const newTree = deleteNodeAtPath(tree, path);
     onWhyTreeUpdate(index, newTree);
+  };
+
+  const handleAddWhy = () => {
+    const currentWhys = event.whys || [];
+    if (currentWhys.length === 0) {
+      // First click — show the root box
+      onWhyTreeUpdate(index, { text: "", children: [] });
+    } else {
+      onWhyTreeUpdate(index, addChildAtPath(tree, []));
+    }
   };
 
   return (
@@ -82,24 +93,21 @@ export default function TimelineItem({ index, event, isLast, onUpdate, onDelete,
             <WhyNode
               node={tree}
               depth={0}
-              path={[0]}
-              onUpdateText={(path, val) => handleUpdateText(path, val)}
-              onAddChild={(path) => handleAddChild(path)}
-              onDeleteNode={(path) => handleDeleteNode(path)}
+              path={[]}
+              onUpdateText={handleUpdateText}
+              onAddChild={handleAddChild}
+              onDeleteNode={handleDeleteNode}
             />
           </div>
         )}
 
         {/* Add Why button */}
         <button
-          onClick={() => {
-            const newTree = addChildAtPath(whysToTree(event.whys || []), []);
-            onWhyTreeUpdate(index, newTree);
-          }}
-          disabled={(event.whys || []).length >= 10}
+          onClick={handleAddWhy}
+          disabled={nodeCount >= 10}
           className="mt-2 ml-3.5 bg-[#0F766E] text-white border-none rounded-[7px] py-1.5 px-2.5 text-[12px] font-semibold cursor-pointer self-start hover:brightness-110 disabled:bg-[#D5E0DE] disabled:text-[#1C4448] disabled:cursor-not-allowed print:hidden"
         >
-          {(event.whys || []).length >= 10 ? "Max 10 Whys" : "+ Why"}
+          {nodeCount >= 10 ? "Max 10 Whys" : "+ Why"}
         </button>
       </div>
 
