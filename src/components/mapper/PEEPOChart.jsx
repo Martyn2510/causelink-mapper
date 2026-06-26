@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, X, Paperclip } from "lucide-react";
+import { Droppable } from "@hello-pangea/dnd";
 
 const COLUMNS = [
   { id: "people", label: "People", hint: "Fitness, fatigue, competency, behaviour, supervision.", color: "border-t-[#1C4448]" },
@@ -46,37 +47,48 @@ export default function PEEPOChart({ peepo, onChange, onLinkEvidence }) {
                 {(peepo[col.id] || []).map((item, idx) => {
                   const evCount = (item.evidence_ids || []).length;
                   return (
-                    <div key={idx} className="relative">
-                      <textarea
-                        value={item.text || ""}
-                        onChange={(e) => updateItem(col.id, idx, e.target.value)}
-                        placeholder="Enter a contributing factor…"
-                        rows={2}
-                        className={`w-full text-[13px] text-[#0E2F33] bg-[#F1F5F4] border rounded-lg p-2 pr-7 resize-none focus:outline-none focus:ring-1 ${
-                          evCount ? "border-[#0F766E]" : "border-[#D5E0DE] focus:border-[#0F766E]"
-                        }`}
-                      />
-                      <button
-                        onClick={() => deleteItem(col.id, idx)}
-                        className="absolute top-1.5 right-1.5 w-[18px] h-[18px] rounded flex items-center justify-center bg-[#0E2F33]/5 text-[#1C4448] hover:bg-[#C5563D] hover:text-white cursor-pointer border-none print:hidden"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() =>
-                          onLinkEvidence({
-                            kind: "peepo",
-                            colId: col.id,
-                            index: idx,
-                            label: `${col.label} — entry ${idx + 1}`,
-                          })
-                        }
-                        className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-[#0F766E] hover:underline print:hidden"
-                      >
-                        <Paperclip className="w-3 h-3" />
-                        {evCount > 0 ? `${evCount} evidence linked` : "Link evidence"}
-                      </button>
-                    </div>
+                    <Droppable key={idx} droppableId={`peepo-${col.id}-${idx}`}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`relative rounded-lg transition-colors ${
+                            snapshot.isDraggingOver ? "bg-[#0F766E]/8" : ""
+                          }`}
+                        >
+                          <textarea
+                            value={item.text || ""}
+                            onChange={(e) => updateItem(col.id, idx, e.target.value)}
+                            placeholder="Enter a contributing factor…"
+                            rows={2}
+                            className={`w-full text-[13px] text-[#0E2F33] bg-[#F1F5F4] border rounded-lg p-2 pr-7 resize-none focus:outline-none focus:ring-1 ${
+                              evCount ? "border-[#0F766E]" : "border-[#D5E0DE] focus:border-[#0F766E]"
+                            } ${snapshot.isDraggingOver ? "ring-2 ring-[#0F766E]/30" : ""}`}
+                          />
+                          <button
+                            onClick={() => deleteItem(col.id, idx)}
+                            className="absolute top-1.5 right-1.5 w-[18px] h-[18px] rounded flex items-center justify-center bg-[#0E2F33]/5 text-[#1C4448] hover:bg-[#C5563D] hover:text-white cursor-pointer border-none print:hidden"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              onLinkEvidence({
+                                kind: "peepo",
+                                colId: col.id,
+                                index: idx,
+                                label: `${col.label} — entry ${idx + 1}`,
+                              })
+                            }
+                            className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-[#0F766E] hover:underline print:hidden"
+                          >
+                            <Paperclip className="w-3 h-3" />
+                            {evCount > 0 ? `${evCount} evidence linked` : "Link evidence"}
+                          </button>
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
                   );
                 })}
 

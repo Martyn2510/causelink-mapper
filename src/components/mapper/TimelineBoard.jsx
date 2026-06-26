@@ -3,7 +3,7 @@ import TimelineItem from "./TimelineItem";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-export default function TimelineBoard({ timeline, onAdd, onUpdate, onDelete, onAddWhy, onUpdateWhy, onDeleteWhy, onLinkEvidence }) {
+export default function TimelineBoard({ timeline, onAdd, onUpdate, onDelete, onWhyTreeUpdate, onLinkEvidence }) {
   return (
     <div className="bg-[#FBFCFC] border border-[#D5E0DE] rounded-[14px] p-6 mb-6">
       <div className="flex flex-wrap items-start">
@@ -20,9 +20,7 @@ export default function TimelineBoard({ timeline, onAdd, onUpdate, onDelete, onA
             isLast={i === timeline.length - 1}
             onUpdate={(val) => onUpdate(i, val)}
             onDelete={() => onDelete(i)}
-            onAddWhy={() => onAddWhy(i)}
-            onUpdateWhy={(j, val) => onUpdateWhy(i, j, val)}
-            onDeleteWhy={(j) => onDeleteWhy(i, j)}
+            onWhyTreeUpdate={onWhyTreeUpdate}
             onLinkEvidence={() => onLinkEvidence({ kind: "timeline", index: i, label: `Event ${i + 1}` })}
           />
         ))}

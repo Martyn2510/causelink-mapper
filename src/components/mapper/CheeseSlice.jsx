@@ -1,7 +1,7 @@
 import React from "react";
 import HoleCard from "./HoleCard";
 
-export default function CheeseSlice({ layer, holes, onAdd, onDelete }) {
+export default function CheeseSlice({ layer, holes, onAdd, onDelete, onConnect, connectSource, getConnectionCount }) {
   return (
     <div className="flex-1 min-w-0 flex flex-col">
       <div className="text-center mb-3 flex flex-col h-[110px]">
@@ -17,7 +17,17 @@ export default function CheeseSlice({ layer, holes, onAdd, onDelete }) {
         <div className={`absolute top-[-1px] left-[-1px] right-[-1px] h-1.5 rounded-t-xl ${layer.labelBg}`} />
 
         {holes.map((hole, idx) => (
-          <HoleCard key={idx} hole={hole} onDelete={() => onDelete(idx)} />
+          <HoleCard
+            key={idx}
+            hole={hole}
+            layerId={layer.id}
+            idx={idx}
+            onDelete={() => onDelete(idx)}
+            onConnect={onConnect}
+            connectMode={!!connectSource}
+            isConnectSource={connectSource && connectSource.layerId === layer.id && connectSource.idx === idx}
+            connectionCount={getConnectionCount(layer.id, idx)}
+          />
         ))}
 
         <button

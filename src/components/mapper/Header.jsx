@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer, Download, Upload, Trash2, BookOpen } from "lucide-react";
+import { Printer, Download, Upload, Trash2, BookOpen, FileType } from "lucide-react";
 
-export default function Header({ onLoadDemo, onClear, onExport, onImport }) {
+export default function Header({ onLoadDemo, onClear, onExport, onImport, onExportWord }) {
   const fileRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -76,6 +76,17 @@ export default function Header({ onLoadDemo, onClear, onExport, onImport }) {
             className="hidden"
             onChange={handleFileChange}
           />
+          {onExportWord && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-transparent text-white border-white/35 hover:bg-white/12 font-semibold text-[13px]"
+              onClick={onExportWord}
+            >
+              <FileType className="w-3.5 h-3.5 mr-1.5" />
+              Word
+            </Button>
+          )}
           <Button
             size="sm"
             className="bg-[#9FBF3B] text-[#0E2F33] hover:brightness-105 font-semibold text-[13px]"
