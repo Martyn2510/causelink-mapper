@@ -146,7 +146,7 @@ export default function CausationMapper() {
         <MetaPanel meta={meta} onChange={setMeta} />
 
         <SectionIntro title="PEEPO Chart">
-          Brainstorm and categorise the contributing factors under People, Equipment, Environment, Procedures and Organisation — a structured way to ensure no factor domain is overlooked before building the event sequence.
+          A structured way to ensure no factor domain is overlooked before building the event sequence — categorise factors across People, Equipment, Environment, Procedures and Organisation.
         </SectionIntro>
 
         <PEEPOChart peepo={peepo} onChange={setPeepo} />
