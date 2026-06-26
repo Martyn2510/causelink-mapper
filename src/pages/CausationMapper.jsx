@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import Header from "@/components/mapper/Header";
 import MetaPanel from "@/components/mapper/MetaPanel";
+import PEEPOChart from "@/components/mapper/PEEPOChart";
 import TimelineBoard from "@/components/mapper/TimelineBoard";
 import CheeseBoard from "@/components/mapper/CheeseBoard";
 import BreachModal from "@/components/mapper/BreachModal";
@@ -8,12 +9,13 @@ import SummaryPanel from "@/components/mapper/SummaryPanel";
 import SectionIntro from "@/components/mapper/SectionIntro";
 import Caveat from "@/components/mapper/Caveat";
 import Footer from "@/components/mapper/Footer";
-import { LAYERS, DEMO_DATA, getInitialHoles } from "@/lib/layers";
+import { LAYERS, DEMO_DATA, DEMO_PEEPO, getInitialHoles } from "@/lib/layers";
 
 export default function CausationMapper() {
   const [meta, setMeta] = useState({ ref: "", title: "", event_date: "", investigator: "", outcome: "" });
   const [timeline, setTimeline] = useState([]);
   const [holes, setHoles] = useState(getInitialHoles());
+  const [peepo, setPeepo] = useState({ people: "", equipment: "", environment: "", procedures: "", organisation: "" });
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLayerId, setModalLayerId] = useState(null);
 
@@ -79,7 +81,7 @@ export default function CausationMapper() {
 
   // File operations
   const handleExport = useCallback(() => {
-    const data = { meta, timeline, holes, exported: new Date().toISOString() };
+    const data = { meta, timeline, holes, peepo, exported: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -107,12 +109,20 @@ export default function CausationMapper() {
       newHoles[l.id] = (data.holes && data.holes[l.id]) || [];
     });
     setHoles(newHoles);
+    setPeepo({
+      people: (data.peepo && data.peepo.people) || "",
+      equipment: (data.peepo && data.peepo.equipment) || "",
+      environment: (data.peepo && data.peepo.environment) || "",
+      procedures: (data.peepo && data.peepo.procedures) || "",
+      organisation: (data.peepo && data.peepo.organisation) || "",
+    });
   }, []);
 
   const handleLoadDemo = useCallback(() => {
     setMeta(DEMO_DATA.meta);
     setTimeline(DEMO_DATA.timeline);
     setHoles(DEMO_DATA.holes);
+    setPeepo(DEMO_PEEPO);
   }, []);
 
   const handleClear = useCallback(() => {
@@ -120,6 +130,7 @@ export default function CausationMapper() {
     setMeta({ ref: "", title: "", event_date: "", investigator: "", outcome: "" });
     setTimeline([]);
     setHoles(getInitialHoles());
+    setPeepo({ people: "", equipment: "", environment: "", procedures: "", organisation: "" });
   }, []);
 
   return (
@@ -133,6 +144,12 @@ export default function CausationMapper() {
 
       <div className="max-w-[1320px] mx-auto px-6">
         <MetaPanel meta={meta} onChange={setMeta} />
+
+        <SectionIntro title="PEEPO Chart">
+          Brainstorm and categorise the contributing factors under People, Equipment, Environment, Procedures and Organisation — a structured way to ensure no factor domain is overlooked before building the event sequence.
+        </SectionIntro>
+
+        <PEEPOChart peepo={peepo} onChange={setPeepo} />
 
         <SectionIntro title="Sequence of events">
           The step-by-step lead-up to the incident. Add a box for each event in the chain, in the order it occurred, and describe what happened.
