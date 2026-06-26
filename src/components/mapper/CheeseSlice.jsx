@@ -34,7 +34,7 @@ export default function CheeseSlice({ layer, holes, onAdd, onDelete, onConnect, 
           onClick={onAdd}
           className="w-full border-[1.5px] border-dashed border-[#D5E0DE] bg-transparent text-[#0F766E] rounded-lg py-2.5 text-[12.5px] font-semibold cursor-pointer hover:border-[#0F766E] hover:bg-[#F1F5F4] print:hidden"
         >
-          + {layer.id === "def" ? "Add Unwanted Event" : "Add breach"}
+          + {layer.id === "def" ? "Add Unwanted Event" : "Add error"}
         </button>
       </div>
     </div>

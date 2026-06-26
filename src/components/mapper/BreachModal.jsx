@@ -48,7 +48,7 @@ export default function BreachModal({ open, layerId, onClose, onSave }) {
       <div className="bg-white rounded-[14px] max-w-[560px] w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Header */}
         <div className="bg-[#0E2F33] text-white py-4 px-5 rounded-t-[14px]">
-          <h3 className="font-heading text-lg font-semibold">Add breach — {layer.name}</h3>
+          <h3 className="font-heading text-lg font-semibold">Add error — {layer.name}</h3>
           <p className="text-[12.5px] text-[#7FA88B] mt-0.5">{layer.desc}</p>
         </div>
 
@@ -71,7 +71,7 @@ export default function BreachModal({ open, layerId, onClose, onSave }) {
 
           <div>
             <label className="block text-[11px] font-bold tracking-wider uppercase text-[#0F766E] mb-1.5">
-              The breach / weakness
+              The error / weakness
             </label>
             <Textarea
               ref={textRef}

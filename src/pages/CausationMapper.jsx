@@ -378,11 +378,11 @@ export default function CausationMapper() {
 
           <EvidenceLibrary evidence={evidence} onAdd={addEvidence} onDelete={deleteEvidence} />
 
-          <SectionIntro title="Map the barrier breaches" legend>
+          <SectionIntro title="Map the barrier errors" legend>
             <>
               Unwanted events present as either a <b>latent condition</b> (a pre-existing organisational, system, or design weakness lying dormant) or an <b>active failure</b> (an unsafe act or error at the point of operation).
               <br /><br />
-              For each, capture the control that failed or was absent. Use the <b>Connect</b> button on any breach to draw an accident path vector showing how holes align across layers.
+              For each, capture the control that failed or was absent. Use the <b>Connect</b> button on any error to draw an accident path vector showing how holes align across layers.
             </>
           </SectionIntro>
 
