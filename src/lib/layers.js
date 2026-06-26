@@ -126,8 +126,8 @@ export function getInitialHoles() {
 }
 
 export function interpret(latent, active, layersHit) {
-  if (latent + active === 0) return 'Add barrier breaches to each layer to build the trajectory. The investigative goal is to surface latent conditions, not stop at the active failure.';
+  if (latent + active === 0) return 'Add barrier errors to each layer to build the trajectory. The investigative goal is to surface latent conditions, not stop at the active failure.';
   if (latent === 0 && active > 0) return 'Caution: only active failures mapped so far. An accident that penetrated multiple layers almost always rests on latent conditions upstream — interrogate supervision and organisational tiers before concluding.';
   if (latent >= active) return `This profile is weighted toward latent conditions (${latent} latent vs ${active} active) — consistent with an organisational, systemic unwanted event. Corrective actions should target the system as designed and managed, prioritising critical controls in the hierarchy.`;
-  return `${latent} latent and ${active} active breaches mapped across ${layersHit} layers. Test whether each active failure was a foreseeable consequence of an upstream latent condition before assigning weight to point-of-operation behaviour.`;
+  return `${latent} latent and ${active} active errors mapped across ${layersHit} layers. Test whether each active failure was a foreseeable consequence of an upstream latent condition before assigning weight to point-of-operation behaviour.`;
 }

@@ -21,11 +21,11 @@ export default function SummaryPanel({ holes }) {
 
   return (
     <div className="bg-[#FBFCFC] border border-[#D5E0DE] rounded-[14px] p-6 my-6">
-      <h2 className="font-heading text-xl font-semibold mb-3.5">Breach profile</h2>
+      <h2 className="font-heading text-xl font-semibold mb-3.5">Error profile</h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-5">
         <div className="bg-white border border-[#D5E0DE] rounded-[10px] p-4 text-center">
           <div className="font-heading text-3xl font-bold text-[#0F766E]">{total}</div>
-          <div className="text-[11.5px] font-semibold tracking-wide uppercase text-[#1C4448] mt-0.5">Total breaches</div>
+          <div className="text-[11.5px] font-semibold tracking-wide uppercase text-[#1C4448] mt-0.5">Total errors</div>
         </div>
         <div className="bg-white border border-[#D5E0DE] rounded-[10px] p-4 text-center">
           <div className="font-heading text-3xl font-bold text-[#C5563D]">{latent}</div>
