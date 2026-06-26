@@ -162,6 +162,7 @@ export default function EvidenceLibrary({ evidence, onAdd, onDelete }) {
   const [fileName, setFileName] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -175,7 +176,7 @@ export default function EvidenceLibrary({ evidence, onAdd, onDelete }) {
       console.error("Upload failed:", err);
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (e.target) e.target.value = "";
     }
   };
 
@@ -183,6 +184,7 @@ export default function EvidenceLibrary({ evidence, onAdd, onDelete }) {
     setFileUrl("");
     setFileName("");
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
   };
 
   const handleAdd = () => {
@@ -292,28 +294,46 @@ export default function EvidenceLibrary({ evidence, onAdd, onDelete }) {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center gap-2 w-full border border-dashed border-[#7FA88B] rounded-[8px] px-3 py-2.5 text-[13px] text-[#1C4448] hover:bg-[#7FA88B]/5 disabled:opacity-60 cursor-pointer border-none"
-              >
-                {uploading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-[#0F766E]" />
-                    Uploading…
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4 text-[#0F766E]" />
-                    Click to upload a file
-                  </>
-                )}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2 flex-1 border border-dashed border-[#7FA88B] rounded-[8px] px-3 py-2.5 text-[13px] text-[#1C4448] hover:bg-[#7FA88B]/5 disabled:opacity-60 cursor-pointer border-none"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#0F766E]" />
+                      Uploading…
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 text-[#0F766E]" />
+                      Click to upload a file
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2 border border-dashed border-[#0F766E] rounded-[8px] px-3 py-2.5 text-[13px] text-[#0F766E] hover:bg-[#0F766E]/5 disabled:opacity-60 cursor-pointer border-none"
+                >
+                  <Camera className="w-4 h-4" />
+                  Take photo
+                </button>
+              </div>
             )}
             <input
               ref={fileInputRef}
               type="file"
               accept={ACCEPTED_FILE_TYPES}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
               onChange={handleFileChange}
               className="hidden"
             />
