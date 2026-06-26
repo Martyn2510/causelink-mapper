@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Camera, Mic, FileText, Eye, Video, Database, FileQuestion, GripVertical } from "lucide-react";
+import { Plus, X, Camera, Mic, FileText, Eye, Video, Database, FileQuestion, GripVertical, Upload, Loader2, Paperclip, ImageIcon, FileAudio } from "lucide-react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
+import { base44 } from "@/api/base44Client";
 
 const EVIDENCE_TYPES = [
   { value: "photo", label: "Photo", icon: Camera },
@@ -36,8 +37,62 @@ const TYPE_STYLES = {
   other: "bg-[#0E2F33]/5 text-[#1C4448]",
 };
 
+const ACCEPTED_FILE_TYPES = ".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.mp3,.wav,.m4a,.ogg,.webm,.mp4";
+
 function genId() {
   return "ev_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
+}
+
+function getFileKind(fileName) {
+  if (!fileName) return "other";
+  const ext = fileName.split(".").pop().toLowerCase();
+  if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) return "image";
+  if (["mp3", "wav", "m4a", "ogg", "webm"].includes(ext)) return "audio";
+  if (["mp4"].includes(ext)) return "video";
+  return "document";
+}
+
+function FileAttachment({ ev }) {
+  if (!ev.file_url) return null;
+  const kind = getFileKind(ev.file_name || ev.file_url);
+
+  if (kind === "image") {
+    return (
+      <div className="mt-2">
+        <a href={ev.file_url} target="_blank" rel="noopener noreferrer" className="block">
+          <img
+            src={ev.file_url}
+            alt={ev.file_name || "evidence"}
+            className="max-h-32 rounded-[8px] border border-[#D5E0DE] object-cover"
+          />
+        </a>
+        <p className="text-[10px] text-[#7FA88B] mt-1 truncate">{ev.file_name}</p>
+      </div>
+    );
+  }
+
+  if (kind === "audio") {
+    return (
+      <div className="mt-2">
+        <audio controls className="w-full h-8" preload="metadata">
+          <source src={ev.file_url} />
+        </audio>
+        <p className="text-[10px] text-[#7FA88B] mt-1 truncate">{ev.file_name}</p>
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href={ev.file_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-[#0F766E] hover:underline"
+    >
+      <Paperclip className="w-3 h-3" />
+      <span className="truncate">{ev.file_name || "Attached file"}</span>
+    </a>
+  );
 }
 
 function EvidenceCard({ ev, index, onDelete }) {
@@ -83,6 +138,7 @@ function EvidenceCard({ ev, index, onDelete }) {
               {ev.description && (
                 <p className="text-[12px] text-[#1C4448] mt-0.5">{ev.description}</p>
               )}
+              <FileAttachment ev={ev} />
             </div>
           </div>
           <button
@@ -102,13 +158,47 @@ export default function EvidenceLibrary({ evidence, onAdd, onDelete }) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState("photo");
   const [description, setDescription] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await base44.integrations.Core.UploadFile({ file });
+      setFileUrl(res.file_url);
+      setFileName(file.name);
+    } catch (err) {
+      console.error("Upload failed:", err);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const clearFile = () => {
+    setFileUrl("");
+    setFileName("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleAdd = () => {
     if (!title.trim()) return;
-    onAdd({ id: genId(), title: title.trim(), type, description: description.trim() });
+    onAdd({
+      id: genId(),
+      title: title.trim(),
+      type,
+      description: description.trim(),
+      file_url: fileUrl || undefined,
+      file_name: fileName || undefined,
+    });
     setTitle("");
     setType("photo");
     setDescription("");
+    clearFile();
     setShowForm(false);
   };
 
@@ -116,6 +206,7 @@ export default function EvidenceLibrary({ evidence, onAdd, onDelete }) {
     setTitle("");
     setType("photo");
     setDescription("");
+    clearFile();
     setShowForm(false);
   };
 
@@ -185,13 +276,55 @@ export default function EvidenceLibrary({ evidence, onAdd, onDelete }) {
               className="text-sm resize-none"
             />
           </div>
+          <div>
+            <label className="block text-[11px] font-bold tracking-wider uppercase text-[#0F766E] mb-1.5">
+              Attach file (PDF, image, Word document, or audio)
+            </label>
+            {fileUrl ? (
+              <div className="flex items-center gap-2 bg-[#0F766E]/5 border border-[#0F766E]/20 rounded-[8px] px-3 py-2">
+                <Paperclip className="w-4 h-4 text-[#0F766E] flex-shrink-0" />
+                <span className="text-[13px] text-[#0E2F33] truncate flex-1">{fileName}</span>
+                <button
+                  onClick={clearFile}
+                  className="w-[20px] h-[20px] rounded flex items-center justify-center text-[#C5563D] hover:bg-[#C5563D]/10 cursor-pointer border-none"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-2 w-full border border-dashed border-[#7FA88B] rounded-[8px] px-3 py-2.5 text-[13px] text-[#1C4448] hover:bg-[#7FA88B]/5 disabled:opacity-60 cursor-pointer border-none"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-[#0F766E]" />
+                    Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 text-[#0F766E]" />
+                    Click to upload a file
+                  </>
+                )}
+              </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ACCEPTED_FILE_TYPES}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={handleCancel} className="text-[#1C4448]">
               Cancel
             </Button>
             <Button
               onClick={handleAdd}
-              disabled={!title.trim()}
+              disabled={!title.trim() || uploading}
               className="bg-[#9FBF3B] text-[#0E2F33] hover:brightness-105 font-semibold"
             >
               Add to library

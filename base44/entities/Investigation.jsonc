@@ -180,6 +180,14 @@
           },
           "description": {
             "type": "string"
+          },
+          "file_url": {
+            "type": "string",
+            "description": "Uploaded file URL"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Original uploaded file name"
           }
         }
       }
