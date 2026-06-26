@@ -28,7 +28,7 @@ export default function Header({ onLoadDemo, onClear, onExport, onImport }) {
           <div>
             <h1 className="font-heading text-xl font-semibold text-white">Causation Mapper</h1>
             <p className="text-[12.5px] text-[#7FA88B] tracking-wide uppercase">
-              Reason's Organisational Accident Model · Investigation Tool
+              Organisational Accident Model · Investigation Tool
             </p>
           </div>
         </div>
