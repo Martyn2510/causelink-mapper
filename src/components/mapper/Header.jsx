@@ -26,7 +26,7 @@ export default function Header({ onLoadDemo, onClear, onExport, onImport }) {
       <div className="max-w-[1320px] mx-auto px-6 flex items-center justify-between gap-5 flex-wrap">
         <div className="flex items-center gap-3.5">
           <div>
-            <h1 className="font-heading text-xl font-semibold text-white">Causation Mapper</h1>
+            <h1 className="font-heading text-xl font-semibold text-white">Causal Link Mapper</h1>
             <p className="text-[12.5px] text-[#7FA88B] tracking-wide uppercase">
               Organisational Accident Model · Investigation Tool
             </p>
