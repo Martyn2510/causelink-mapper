@@ -15,7 +15,7 @@ export default function CausationMapper() {
   const [meta, setMeta] = useState({ ref: "", title: "", event_date: "", investigator: "", outcome: "" });
   const [timeline, setTimeline] = useState([]);
   const [holes, setHoles] = useState(getInitialHoles());
-  const [peepo, setPeepo] = useState({ people: "", equipment: "", environment: "", procedures: "", organisation: "" });
+  const [peepo, setPeepo] = useState({ people: [], equipment: [], environment: [], procedures: [], organisation: [] });
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLayerId, setModalLayerId] = useState(null);
 
@@ -110,11 +110,11 @@ export default function CausationMapper() {
     });
     setHoles(newHoles);
     setPeepo({
-      people: (data.peepo && data.peepo.people) || "",
-      equipment: (data.peepo && data.peepo.equipment) || "",
-      environment: (data.peepo && data.peepo.environment) || "",
-      procedures: (data.peepo && data.peepo.procedures) || "",
-      organisation: (data.peepo && data.peepo.organisation) || "",
+      people: Array.isArray(data.peepo?.people) ? data.peepo.people : [],
+      equipment: Array.isArray(data.peepo?.equipment) ? data.peepo.equipment : [],
+      environment: Array.isArray(data.peepo?.environment) ? data.peepo.environment : [],
+      procedures: Array.isArray(data.peepo?.procedures) ? data.peepo.procedures : [],
+      organisation: Array.isArray(data.peepo?.organisation) ? data.peepo.organisation : [],
     });
   }, []);
 
@@ -130,7 +130,7 @@ export default function CausationMapper() {
     setMeta({ ref: "", title: "", event_date: "", investigator: "", outcome: "" });
     setTimeline([]);
     setHoles(getInitialHoles());
-    setPeepo({ people: "", equipment: "", environment: "", procedures: "", organisation: "" });
+    setPeepo({ people: [], equipment: [], environment: [], procedures: [], organisation: [] });
   }, []);
 
   return (

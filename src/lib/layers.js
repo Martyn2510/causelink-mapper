@@ -84,11 +84,31 @@ export const DEMO_DATA = {
 };
 
 export const DEMO_PEEPO = {
-  people: '• Operator on 12th consecutive night shift — fatigue.\n• Relief operator not available; roster gap.\n• Supervisor did not action prior retarder defect reports.',
-  equipment: '• Ageing haul truck retained beyond planned service life.\n• Intermittent retarder fault across three shifts.\n• No in-cab decision support for descent gear selection.',
-  environment: '• Ramp 3 descent grade and load condition.\n• No runaway escape ramp provided.\n• Windrow was sole physical defence at base.',
-  procedures: '• Gear-selection rule for grade not reinforced.\n• Defect escalation procedure not enforced by supervision.\n• No trigger linking retarder faults to stop-work decision.',
-  organisation: '• Fleet replacement deferred two budget cycles under production pressure.\n• No critical control management framework for "loss of control on grade".\n• Fatigue management standard not enforced for relief crews.',
+  people: [
+    'Operator on 12th consecutive night shift — fatigue.',
+    'Relief operator not available; roster gap.',
+    'Supervisor did not action prior retarder defect reports.',
+  ],
+  equipment: [
+    'Ageing haul truck retained beyond planned service life.',
+    'Intermittent retarder fault across three shifts.',
+    'No in-cab decision support for descent gear selection.',
+  ],
+  environment: [
+    'Ramp 3 descent grade and load condition.',
+    'No runaway escape ramp provided.',
+    'Windrow was sole physical defence at base.',
+  ],
+  procedures: [
+    'Gear-selection rule for grade not reinforced.',
+    'Defect escalation procedure not enforced by supervision.',
+    'No trigger linking retarder faults to stop-work decision.',
+  ],
+  organisation: [
+    'Fleet replacement deferred two budget cycles under production pressure.',
+    'No critical control management framework for "loss of control on grade".',
+    'Fatigue management standard not enforced for relief crews.',
+  ],
 };
 
 export function getInitialHoles() {
