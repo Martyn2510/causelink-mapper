@@ -350,7 +350,7 @@ export default function CausationMapper() {
           onExportWord={handleExportWord}
         />
 
-        <div className="max-w-[1320px] mx-auto px-6">
+        <div className="max-w-[1600px] mx-auto px-6">
           <MetaPanel meta={meta} onChange={setMeta} />
 
           <SectionIntro title="PEEPO Chart">

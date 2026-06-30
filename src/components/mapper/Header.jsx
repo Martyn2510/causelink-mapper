@@ -24,15 +24,12 @@ export default function Header({ onLoadDemo, onClear, onExport, onImport, onExpo
   return (
     <header className="bg-[#0E2F33] text-white py-5 print:py-3">
       <div className="max-w-[1320px] mx-auto px-6 flex items-center justify-between gap-5 flex-wrap">
-        <div className="flex items-center gap-3.5">
-          <div>
-            <h1 className="font-heading text-xl font-semibold text-white">Causal Link Mapper</h1>
-            <p className="text-[12.5px] text-[#7FA88B] tracking-wide uppercase">
-              Organisational Accident Model · Investigation Tool
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2.5 flex-wrap print:hidden">
+        <img
+          src="https://media.base44.com/images/public/6a3669c0131fc5acf62aa717/ee0028044_MCC_Logo_ConsideredCalm_Investigations_6.png"
+          alt="Martyn Campbell Consulting"
+          className="h-16 w-auto rounded-lg bg-white p-1.5 flex-shrink-0 print:h-14"
+        />
+        <div className="flex gap-2.5 flex-wrap justify-end flex-1 print:hidden">
           <Button
             variant="outline"
             size="sm"
