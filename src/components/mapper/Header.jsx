@@ -25,11 +25,11 @@ export default function Header({ onLoadDemo, onClear, onExport, onImport, onExpo
     <header className="bg-[#0E2F33] text-white py-5 print:py-3 relative">
       <div className="max-w-[1600px] mx-auto px-6 flex flex-col gap-4">
         <div className="flex items-center justify-between gap-5 relative">
-          <h1 className="font-heading text-xl font-semibold text-white absolute left-1/2 -translate-x-1/2">Causal Mapper</h1>
+          <h1 className="font-heading text-3xl font-semibold text-white absolute left-1/2 -translate-x-1/2">Causal Mapper</h1>
           <img
             src="https://media.base44.com/images/public/6a3669c0131fc5acf62aa717/50dc16eb0_MCC_Logo_ConsideredCalm_Investigations_6.png"
             alt="Martyn Campbell Consulting"
-            className="h-28 w-auto rounded-lg bg-white p-2 flex-shrink-0 ml-auto print:h-20"
+            className="h-28 w-auto rounded-lg bg-white p-2 flex-shrink-0 ml-auto self-center print:h-20"
           />
         </div>
         <div className="flex gap-2.5 flex-wrap print:hidden">
