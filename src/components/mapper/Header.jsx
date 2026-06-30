@@ -88,6 +88,11 @@ export default function Header({ onLoadDemo, onClear, onExport, onImport, onExpo
               Print / PDF
             </Button>
         <h1 className="font-heading text-xl font-semibold text-white absolute left-1/2 -translate-x-1/2">Causal Mapper</h1>
+        <img
+          src="https://media.base44.com/images/public/6a3669c0131fc5acf62aa717/50dc16eb0_MCC_Logo_ConsideredCalm_Investigations_6.png"
+          alt="Martyn Campbell Consulting"
+          className="h-16 w-auto rounded-lg bg-white p-1.5 flex-shrink-0 print:h-14"
+        />
         </div>
       </div>
     </header>
