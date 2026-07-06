@@ -7,7 +7,7 @@ export default function Landing({ onOpen }) {
         <img
           src="https://media.base44.com/images/public/6a3669c0131fc5acf62aa717/31a306fb5_MynewMCCLogo.jpg"
           alt="Martyn Campbell Consulting"
-          className="mx-auto mb-8 w-full max-w-lg"
+          className="mx-auto mb-8 w-full max-w-sm"
         />
         <h1 className="font-heading text-5xl font-bold text-[#0E2F33] mb-4">
           Causal Link Mapper
