@@ -40,7 +40,7 @@ export default function SummaryPanel({ holes }) {
           <div className="text-[11.5px] font-semibold tracking-wide uppercase text-[#1C4448] mt-0.5">Layers penetrated</div>
         </div>
       </div>
-      <p className="text-[13.5px] text-[#1C4448]" dangerouslySetInnerHTML={{ __html: interpretation }} />
+      <p className="text-[13.5px] text-[#1C4448]">{interpretation}</p>
     </div>
   );
 }

@@ -34,19 +34,21 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Recipient must be a registered app user' }, { status: 403 });
     }
 
-    // Sanitize subject to prevent header injection (strip newlines)
-    const actionText = String(action.action || 'Action').slice(0, 60).replace(/[\r\n]/g, ' ');
+    // Sanitize all text fields: strip newlines/control chars to prevent header injection
+    const clean = (v) => String(v || '').replace(/[\r\n\0]/g, ' ').slice(0, 500);
+
+    const actionText = clean(action.action).slice(0, 60);
     const subject = `Corrective Action — ${actionText}`;
 
     const lines = [];
     lines.push('A corrective action has been shared with you from CauseLink Mapper.');
     lines.push('');
-    if (action.cause) lines.push(`Linked cause: ${action.cause}`);
-    lines.push(`Action: ${action.action}`);
-    if (action.owner) lines.push(`Owner: ${action.owner}`);
-    if (action.priority) lines.push(`Priority: ${action.priority}`);
-    if (action.due_date) lines.push(`Due date: ${action.due_date}`);
-    if (action.status) lines.push(`Status: ${action.status}`);
+    if (action.cause) lines.push(`Linked cause: ${clean(action.cause)}`);
+    lines.push(`Action: ${clean(action.action)}`);
+    if (action.owner) lines.push(`Owner: ${clean(action.owner)}`);
+    if (action.priority) lines.push(`Priority: ${clean(action.priority)}`);
+    if (action.due_date) lines.push(`Due date: ${clean(action.due_date)}`);
+    if (action.status) lines.push(`Status: ${clean(action.status)}`);
     lines.push('');
     lines.push('— CauseLink Mapper');
 
@@ -59,6 +61,7 @@ Deno.serve(async (req) => {
       lines.join('\n'),
     ].join('\r\n');
 
+    // Recipient whitelist already enforced above — only registered app users can receive
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
 
     const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
