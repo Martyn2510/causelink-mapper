@@ -11,6 +11,7 @@ import EvidenceLinker from "@/components/mapper/EvidenceLinker";
 import ReportModal from "@/components/mapper/ReportModal";
 import { base44 } from "@/api/base44Client";
 import SummaryPanel from "@/components/mapper/SummaryPanel";
+import ActionRegister from "@/components/mapper/ActionRegister";
 import SectionIntro from "@/components/mapper/SectionIntro";
 import Caveat from "@/components/mapper/Caveat";
 import Footer from "@/components/mapper/Footer";
@@ -39,6 +40,7 @@ export default function CausationMapper() {
   const [peepo, setPeepo] = useState({ people: [], equipment: [], environment: [], procedures: [], organisation: [] });
   const [evidence, setEvidence] = useState([]);
   const [connections, setConnections] = useState([]);
+  const [actions, setActions] = useState([]);
   const [connectSource, setConnectSource] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLayerId, setModalLayerId] = useState(null);
@@ -101,6 +103,16 @@ export default function CausationMapper() {
         (c) => !((c.fromLayer === layerId && c.fromIdx === idx) || (c.toLayer === layerId && c.toIdx === idx))
       )
     );
+    // Clean up actions linked to this hole: delete exact matches, reindex those after it
+    setActions((prev) =>
+      prev
+        .filter((a) => !(a.layer_id === layerId && a.hole_idx === idx))
+        .map((a) =>
+          a.layer_id === layerId && a.hole_idx > idx
+            ? { ...a, hole_idx: a.hole_idx - 1 }
+            : a
+        )
+    );
   }, []);
 
   // Inter-layer connection handlers
@@ -133,6 +145,19 @@ export default function CausationMapper() {
 
   const handleRemoveConnection = useCallback((connId) => {
     setConnections((prev) => prev.filter((c) => c.id !== connId));
+  }, []);
+
+  // Action register handlers
+  const addAction = useCallback((item) => {
+    setActions((prev) => [...prev, item]);
+  }, []);
+
+  const updateAction = useCallback((id, patch) => {
+    setActions((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+  }, []);
+
+  const deleteAction = useCallback((id) => {
+    setActions((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
   // Evidence handlers
@@ -250,7 +275,7 @@ export default function CausationMapper() {
     setReportOpen(true);
     try {
       const response = await base44.functions.invoke("generateReport", {
-        meta, timeline, holes, peepo, evidence,
+        meta, timeline, holes, peepo, evidence, actions,
       });
       setReportData(response.data);
     } catch (err) {
@@ -258,7 +283,7 @@ export default function CausationMapper() {
     } finally {
       setReportLoading(false);
     }
-  }, [meta, timeline, holes, peepo, evidence]);
+  }, [meta, timeline, holes, peepo, evidence, actions]);
 
   const linkerLinkedIds = linkerTarget
     ? linkerTarget.kind === "timeline"
@@ -268,7 +293,7 @@ export default function CausationMapper() {
 
   // File operations
   const handleExport = useCallback(() => {
-    const data = { meta, timeline, holes, peepo, evidence, connections, exported: new Date().toISOString() };
+    const data = { meta, timeline, holes, peepo, evidence, connections, actions, exported: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -317,6 +342,7 @@ export default function CausationMapper() {
     });
     setEvidence(Array.isArray(data.evidence) ? data.evidence : []);
     setConnections(Array.isArray(data.connections) ? data.connections : []);
+    setActions(Array.isArray(data.actions) ? data.actions : []);
   }, []);
 
   const handleLoadDemo = useCallback(() => {
@@ -326,6 +352,7 @@ export default function CausationMapper() {
     setPeepo(DEMO_PEEPO);
     setEvidence(DEMO_EVIDENCE);
     setConnections([]);
+    setActions([]);
   }, []);
 
   const handleClear = useCallback(() => {
@@ -336,6 +363,7 @@ export default function CausationMapper() {
     setPeepo({ people: [], equipment: [], environment: [], procedures: [], organisation: [] });
     setEvidence([]);
     setConnections([]);
+    setActions([]);
     setConnectSource(null);
   }, []);
 
@@ -397,6 +425,14 @@ export default function CausationMapper() {
           />
 
           <SummaryPanel holes={holes} />
+
+          <ActionRegister
+            actions={actions}
+            holes={holes}
+            onAdd={addAction}
+            onUpdate={updateAction}
+            onDelete={deleteAction}
+          />
 
           <div className="flex justify-center mb-6 print:hidden">
             <button

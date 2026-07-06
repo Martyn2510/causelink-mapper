@@ -191,6 +191,56 @@
           }
         }
       }
+    },
+    "actions": {
+      "type": "array",
+      "description": "Corrective actions linked to barrier errors",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "layer_id": {
+            "type": "string",
+            "description": "Barrier layer ID this action addresses"
+          },
+          "hole_idx": {
+            "type": "number",
+            "description": "Index of the hole within the layer"
+          },
+          "action": {
+            "type": "string",
+            "description": "Corrective or preventive action description"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Responsible person"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "default": "medium"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "in_progress",
+              "complete"
+            ],
+            "default": "open"
+          }
+        }
+      }
     }
   },
   "required": [
