@@ -92,9 +92,9 @@ function ActionCard({ action, holes, onUpdate, onDelete }) {
           <Link2 className="w-3.5 h-3.5 text-[#0F766E] flex-shrink-0 mt-0.5" />
           <p className="text-[12px] text-[#1C4448] italic">{cause.text}</p>
         </div>
-      ) : (
+      ) : action.layer_id ? (
         <p className="text-[11px] text-[#C5563D] italic mb-1.5">⚠ Linked cause has been removed from the barrier map.</p>
-      )}
+      ) : null}
 
       <p className="text-[13.5px] font-semibold text-[#0E2F33] mb-2">{action.action}</p>
 
@@ -136,12 +136,18 @@ export default function ActionRegister({ actions, holes, onAdd, onUpdate, onDele
   const hasCauses = causeOptions.length > 0;
 
   const handleAdd = () => {
-    if (!causeKey || !actionText.trim()) return;
-    const [layer_id, hole_idx] = causeKey.split(":");
+    if (!actionText.trim()) return;
+    let layer_id = null;
+    let hole_idx = null;
+    if (causeKey) {
+      const [lid, hidx] = causeKey.split(":");
+      layer_id = lid;
+      hole_idx = parseInt(hidx, 10);
+    }
     onAdd({
       id: genId(),
       layer_id,
-      hole_idx: parseInt(hole_idx, 10),
+      hole_idx,
       action: actionText.trim(),
       owner: owner.trim(),
       priority,
@@ -183,7 +189,6 @@ export default function ActionRegister({ actions, holes, onAdd, onUpdate, onDele
         {!showForm && (
           <Button
             onClick={() => setShowForm(true)}
-            disabled={!hasCauses}
             className="bg-[#9FBF3B] text-[#0E2F33] hover:brightness-105 font-semibold text-[13px]"
             size="sm"
           >
@@ -214,20 +219,26 @@ export default function ActionRegister({ actions, holes, onAdd, onUpdate, onDele
         <div className="bg-white border border-[#D5E0DE] rounded-[10px] p-4 mb-4 space-y-3">
           <div>
             <label className="block text-[11px] font-bold tracking-wider uppercase text-[#0F766E] mb-1.5">
-              Linked cause / contributing factor
+              Linked cause / contributing factor {hasCauses ? "" : "(optional — no barrier errors mapped yet)"}
             </label>
-            <Select value={causeKey} onValueChange={setCauseKey}>
-              <SelectTrigger className="text-sm">
-                <SelectValue placeholder="Select a barrier error from the map…" />
-              </SelectTrigger>
-              <SelectContent>
-                {causeOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {hasCauses ? (
+              <Select value={causeKey} onValueChange={setCauseKey}>
+                <SelectTrigger className="text-sm">
+                  <SelectValue placeholder="Select a barrier error from the map…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {causeOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="text-[12px] text-[#7FA88B] italic py-2">
+                No barrier errors have been mapped yet. You can still add an action — link it to a cause later once errors are mapped in the barrier section above.
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-[11px] font-bold tracking-wider uppercase text-[#0F766E] mb-1.5">
@@ -272,7 +283,7 @@ export default function ActionRegister({ actions, holes, onAdd, onUpdate, onDele
           </div>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={handleCancel} className="text-[#1C4448]">Cancel</Button>
-            <Button onClick={handleAdd} disabled={!causeKey || !actionText.trim()} className="bg-[#9FBF3B] text-[#0E2F33] hover:brightness-105 font-semibold">
+            <Button onClick={handleAdd} disabled={!actionText.trim()} className="bg-[#9FBF3B] text-[#0E2F33] hover:brightness-105 font-semibold">
               Add action
             </Button>
           </div>
@@ -283,7 +294,7 @@ export default function ActionRegister({ actions, holes, onAdd, onUpdate, onDele
         <p className="text-[13.5px] text-[#1C4448] italic py-2">
           {hasCauses
             ? "No actions yet. Click \"Add action\" to create a corrective action linked to a barrier error."
-            : "Add barrier errors in the Map Barriers section above before creating actions — each action must link to a cause or contributing factor."}
+            : "No actions yet. Click \"Add action\" to create a corrective action — you can link it to a barrier error once errors are mapped above."}
         </p>
       ) : (
         <div className="space-y-2.5">
