@@ -19,7 +19,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email address and action data are required' }, { status: 400 });
     }
 
-    const subject = `Corrective Action — ${action.action?.slice(0, 60) || 'Action'}`;
+    // Validate email format to prevent header injection
+    const emailRegex = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
+    if (!emailRegex.test(email)) {
+      return Response.json({ error: 'Invalid email address' }, { status: 400 });
+    }
+
+    // Enforce recipient whitelist: only registered app users may receive emails
+    const recipients = await base44.asServiceRole.entities.User.filter({ email });
+    const isRegistered = Array.isArray(recipients) && recipients.some(
+      (u) => u.email && u.email.toLowerCase() === email.toLowerCase()
+    );
+    if (!isRegistered) {
+      return Response.json({ error: 'Recipient must be a registered app user' }, { status: 403 });
+    }
+
+    // Sanitize subject to prevent header injection (strip newlines)
+    const actionText = String(action.action || 'Action').slice(0, 60).replace(/[\r\n]/g, ' ');
+    const subject = `Corrective Action — ${actionText}`;
 
     const lines = [];
     lines.push('A corrective action has been shared with you from CauseLink Mapper.');
