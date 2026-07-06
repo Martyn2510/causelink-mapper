@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Link2, Trash2, Calendar, User } from "lucide-react";
+import { Plus, X, Link2, Trash2, Calendar, User, Mail, Loader2, Check } from "lucide-react";
 import { LAYERS } from "@/lib/layers";
+import { base44 } from "@/api/base44Client";
 
 const PRIORITIES = [
   { value: "high", label: "High", cls: "bg-[#C5563D]/10 text-[#C5563D] border-[#C5563D]/30" },
@@ -63,6 +64,34 @@ function ActionCard({ action, holes, onUpdate, onDelete }) {
   const cause = lookupCause(holes, action.layer_id, action.hole_idx);
   const pm = priorityMeta(action.priority);
   const sm = statusMeta(action.status);
+  const [emailMode, setEmailMode] = useState(false);
+  const [emailAddr, setEmailAddr] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [emailErr, setEmailErr] = useState(null);
+
+  const handleEmail = async () => {
+    setSending(true);
+    setEmailErr(null);
+    try {
+      await base44.functions.invoke("emailAction", {
+        email: emailAddr,
+        action: {
+          cause: cause?.text || null,
+          action: action.action,
+          owner: action.owner,
+          priority: action.priority,
+          due_date: action.due_date,
+          status: action.status,
+        },
+      });
+      setSent(true);
+    } catch (err) {
+      setEmailErr(err.message || "Failed to send email.");
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="bg-white border border-[#D5E0DE] rounded-[10px] p-3.5 pr-10 relative">
@@ -111,7 +140,42 @@ function ActionCard({ action, holes, onUpdate, onDelete }) {
             {action.due_date}
           </span>
         )}
+        <button
+          onClick={() => { setEmailMode(!emailMode); setSent(false); setEmailErr(null); }}
+          className="flex items-center gap-1 text-[#0F766E] hover:underline cursor-pointer print:hidden"
+        >
+          <Mail className="w-3 h-3" />
+          Email
+        </button>
       </div>
+
+      {emailMode && !sent && (
+        <div className="mt-2.5 flex gap-2 print:hidden">
+          <input
+            type="email"
+            value={emailAddr}
+            onChange={(e) => setEmailAddr(e.target.value)}
+            placeholder="recipient@example.com"
+            disabled={sending}
+            className="flex-1 h-8 text-[12px] rounded-[6px] border border-[#D5E0DE] px-2.5 focus:outline-none focus:border-[#0F766E]"
+          />
+          <button
+            onClick={handleEmail}
+            disabled={sending || !emailAddr}
+            className="flex items-center gap-1 bg-[#0F766E] text-white rounded-[6px] px-3 text-[12px] font-semibold hover:brightness-110 disabled:opacity-60 cursor-pointer border-none"
+          >
+            {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+            Send
+          </button>
+          {emailErr && <span className="text-[11px] text-[#C5563D] self-center">{emailErr}</span>}
+        </div>
+      )}
+      {emailMode && sent && (
+        <div className="mt-2.5 flex items-center gap-1.5 text-[12px] text-[#0F766E] print:hidden">
+          <Check className="w-3.5 h-3.5" />
+          Sent to {emailAddr}
+        </div>
+      )}
 
       <button
         onClick={() => onDelete(action.id)}
