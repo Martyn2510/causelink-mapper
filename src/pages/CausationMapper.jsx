@@ -19,6 +19,7 @@ import { LAYERS, DEMO_DATA, DEMO_PEEPO, DEMO_EVIDENCE, getInitialHoles } from "@
 import { exportToDocx } from "@/lib/reportDocx";
 import { whysToTree, treeToWhys } from "@/components/mapper/whyTreeUtils";
 import { FileText } from "lucide-react";
+import Landing from "@/components/mapper/Landing";
 
 function normalizePeepo(arr) {
   if (!Array.isArray(arr)) return [];
@@ -50,6 +51,7 @@ export default function CausationMapper() {
   const [reportData, setReportData] = useState(null);
   const [reportError, setReportError] = useState(null);
   const [reportOpen, setReportOpen] = useState(false);
+  const [started, setStarted] = useState(false);
 
   // Timeline handlers
   const addStep = useCallback(() => {
@@ -366,6 +368,10 @@ export default function CausationMapper() {
     setActions([]);
     setConnectSource(null);
   }, []);
+
+  if (!started) {
+    return <Landing onOpen={() => setStarted(true)} />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
