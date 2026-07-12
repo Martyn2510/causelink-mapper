@@ -195,7 +195,34 @@ export default function ReportModal({ open, loading, report, error, onClose, tit
               </Section>
 
               <Section number="4" title="Contributing Factors">
-                {report.contributing_factors}
+                {report.contributing_factors && typeof report.contributing_factors === 'object' ? (
+                  <div className="space-y-4">
+                    {[
+                      { key: 'people', label: 'People' },
+                      { key: 'equipment', label: 'Equipment' },
+                      { key: 'environment', label: 'Environment' },
+                      { key: 'procedures', label: 'Procedures' },
+                      { key: 'organisation', label: 'Organisation' },
+                    ].map((cat) => {
+                      const content = report.contributing_factors[cat.key];
+                      if (!content) return null;
+                      return (
+                        <div key={cat.key}>
+                          <h4 className="font-heading text-[13px] font-semibold text-[#0F766E] mb-1.5 uppercase tracking-wide">
+                            {cat.label}
+                          </h4>
+                          <p className="text-[13.5px] text-[#1C4448] leading-relaxed whitespace-pre-wrap pl-1">
+                            {content}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[13.5px] text-[#1C4448] leading-relaxed whitespace-pre-wrap pl-1">
+                    {typeof report.contributing_factors === 'string' ? report.contributing_factors : 'N/A'}
+                  </p>
+                )}
               </Section>
 
               <Section number="5" title="Findings">

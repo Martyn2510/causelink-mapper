@@ -36,11 +36,11 @@ export function generateReportPdf(report, title) {
   doc.line(margin, y, pageWidth - margin, y);
   y += 8;
 
+  // Sections 1-3 and 5
   const sections = [
     { num: "1", title: "Executive Summary", content: report.executive_summary },
     { num: "2", title: "Description of Event", content: report.description_of_event },
     { num: "3", title: "Images of Event", content: report.images_of_event },
-    { num: "4", title: "Contributing Factors", content: report.contributing_factors },
     { num: "5", title: "Findings", content: report.findings },
   ];
 
@@ -49,6 +49,28 @@ export function generateReportPdf(report, title) {
     addText(s.content || "N/A", 11, "normal", 6);
     y += 4;
   });
+
+  // Section 4: Contributing Factors with separate PEEPO sub-headings
+  addText("4. Contributing Factors", 14, "bold", 8);
+  if (report.contributing_factors && typeof report.contributing_factors === 'object') {
+    const peepoCats = [
+      { key: 'people', label: 'People' },
+      { key: 'equipment', label: 'Equipment' },
+      { key: 'environment', label: 'Environment' },
+      { key: 'procedures', label: 'Procedures' },
+      { key: 'organisation', label: 'Organisation' },
+    ];
+    peepoCats.forEach((cat) => {
+      const content = report.contributing_factors[cat.key];
+      if (!content) return;
+      addText(cat.label.toUpperCase(), 11, "bold", 6);
+      addText(content, 11, "normal", 6);
+      y += 3;
+    });
+  } else {
+    addText(typeof report.contributing_factors === 'string' ? report.contributing_factors : 'N/A', 11, "normal", 6);
+  }
+  y += 4;
 
   // Actions
   addText("6. Actions", 14, "bold", 8);

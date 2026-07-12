@@ -118,21 +118,26 @@ Outcome / Loss Event: ${sanitize(meta?.outcome) || 'N/A'}
   prompt += `</user_data>\n\n=== REPORT FORMAT ===
 Generate the report with exactly these sections:
 
-1. EXECUTIVE SUMMARY — A concise overview (2-3 paragraphs) of what happened, the key systemic failures, and the main recommendations. Reference the outcome and the most significant latent conditions.
+1. EXECUTIVE SUMMARY — A concise overview (3-4 paragraphs) of what happened, the key systemic failures, and the main recommendations. Separate each paragraph with a blank line. Reference the outcome and the most significant latent conditions.
 
-2. DESCRIPTION OF EVENT — A narrative account of the incident based on the timeline. Describe the sequence of events in chronological order. Where evidence supports a step, reference it inline (e.g. "(Vehicle telemetry — ramp 3 descent)").
+2. DESCRIPTION OF EVENT — A narrative account of the incident based on the timeline. Describe the sequence of events in chronological order across multiple paragraphs (one paragraph per logical phase of the event). Where evidence supports a step, reference it inline (e.g. "(Vehicle telemetry — ramp 3 descent)").
 
-3. IMAGES OF EVENT — List all photo and CCTV evidence items from the evidence library. For each, provide the title and description. If none exist, state "No images or footage available."
+3. IMAGES OF EVENT — List all photo and CCTV evidence items from the evidence library. For each, provide the title and description on its own line. If none exist, state "No images or footage available."
 
-4. CONTRIBUTING FACTORS — Organise by PEEPO category (People, Equipment, Environment, Procedures, Organisation). For each factor, state the factor and link it to relevant evidence where available.
+4. CONTRIBUTING FACTORS — Organise by PEEPO category. Each category must be a separate field in the JSON output with its own heading. For each category, write 1-2 paragraphs describing the contributing factors and linking them to relevant evidence where available. Use blank lines to separate paragraphs.
 
-5. FINDINGS — Identify the systemic findings from the barrier breach analysis. For each finding, describe the latent condition or active failure, the control that failed or was absent, and the evidence supporting it. Frame findings around system weaknesses, not individual blame.
+5. FINDINGS — Identify the systemic findings from the barrier breach analysis. Write each finding as a separate paragraph. For each finding, describe the latent condition or active failure, the control that failed or was absent, and the evidence supporting it. Frame findings around system weaknesses, not individual blame.
 
 6. ACTIONS — Recommend corrective actions categorised by timeline:
    - Immediate: actions to take now to prevent recurrence (e.g. isolate hazard, interim controls).
    - Short-term: actions within weeks (e.g. procedure updates, training, equipment repairs).
    - Long-term: actions within months (e.g. system redesign, culture change, capital replacement).
    For each action, briefly state which finding it addresses.
+
+FORMATTING RULES:
+- Use double line breaks (blank lines) between paragraphs in all text fields.
+- Write in clear, readable prose — avoid walls of text.
+- Each PEEPO category must be a separate string field in the contributing_factors object.
 
 Return the report as structured JSON.`;
 
@@ -156,7 +161,17 @@ Deno.serve(async (req) => {
           executive_summary: { type: 'string', description: 'Concise overview of the incident, key failures, and main recommendations' },
           description_of_event: { type: 'string', description: 'Narrative account of the incident based on the timeline' },
           images_of_event: { type: 'string', description: 'List of photo and CCTV evidence items, or statement that none exist' },
-          contributing_factors: { type: 'string', description: 'Contributing factors organised by PEEPO category with evidence links' },
+          contributing_factors: {
+            type: 'object',
+            description: 'Contributing factors separated by PEEPO category, each with its own paragraphs',
+            properties: {
+              people: { type: 'string', description: 'People-related contributing factors with evidence links' },
+              equipment: { type: 'string', description: 'Equipment-related contributing factors with evidence links' },
+              environment: { type: 'string', description: 'Environment-related contributing factors with evidence links' },
+              procedures: { type: 'string', description: 'Procedures-related contributing factors with evidence links' },
+              organisation: { type: 'string', description: 'Organisation-related contributing factors with evidence links' },
+            },
+          },
           findings: { type: 'string', description: 'Systemic findings from barrier breach analysis with evidence' },
           actions: {
             type: 'object',
